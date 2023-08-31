@@ -9,9 +9,11 @@ namespace LoginLogoutApp
 {
     static class Utente
     {
-        static public void Start() 
+        static public void Start()
         {
             populateMenu();
+            //List<Accesso> CronologiaAccessi = new List<Accesso>();
+            CronologiaAccessi = new List<Accesso> { };
             Scegli();
 
         }
@@ -29,15 +31,15 @@ namespace LoginLogoutApp
                 );
         }
         static private void Scegli()
-        {   
+        {
             string scelta = Console.ReadLine();
             int choice = 0;
             try
             {
-               choice = Convert.ToInt32(scelta);
+                choice = Convert.ToInt32(scelta);
             }
-            catch( Exception ex ) 
-            {
+            catch (Exception ex)
+            {   
                 Console.WriteLine(ex.Message);
                 Scegli();
             }
@@ -48,6 +50,8 @@ namespace LoginLogoutApp
             }
             else if (choice == 1)
             {
+                Console.Clear();
+                populateMenu();
                 Login();
             }
             else if (choice == 2)
@@ -58,36 +62,74 @@ namespace LoginLogoutApp
             {
                 LoginTime();
             }
+            else if (choice == 4)
+            {
+                PrintAccessList();
+            }
+            else if(choice == 5)
+            {
+                Exit();
+            }
 
         }
         static private bool IsLoggedIn { get; set; }
-        
-        static private void Login() 
+
+        static private void Login()
         {
-            Console.WriteLine("Username:");
-            string userName = Console.ReadLine();
-            Console.WriteLine("Password");
-            string password = Console.ReadLine();
-            Console.WriteLine("conferma password:");
-            string passwordConfirm = Console.ReadLine();
-            if(password.Equals(passwordConfirm)) 
+            if (!IsLoggedIn)
             {
-                Console.WriteLine("Sei stato autenticato.");
-                IsLoggedIn = true;
-                DataOraAccesso = DateTime.Now;
-                Scegli();
+                Console.WriteLine("Username:");
+                string userName = Console.ReadLine();
+                Console.WriteLine("Password");
+                string password = Console.ReadLine();
+                Console.WriteLine("conferma password:");
+                string passwordConfirm = Console.ReadLine();
+                if (password.Equals(passwordConfirm))
+                {   
+                    //resetta schermata menù
+                    Console.Clear();
+                    populateMenu();
+
+                    Console.WriteLine("Sei stato autenticato.");
+                    IsLoggedIn = true;
+                    DataOraAccesso = DateTime.Now;
+                    Accesso newAccess = new Accesso(userName, $"{DataOraAccesso.Day}/{DataOraAccesso.Month}/{DataOraAccesso.Year}", $"{DataOraAccesso.Hour}");
+                    
+                    CronologiaAccessi.Add(newAccess);
+                    
+
+                    Scegli();
+                }
+                else
+                {
+                    //resetta schermata menù
+                    Console.Clear();
+                    populateMenu();
+
+                    Console.WriteLine("Autenticazione fallita.");
+                    Scegli();
+                }
             }
             else
             {
-                Console.WriteLine("Autenticazione fallita.");
+                //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
+                Console.WriteLine("Hai già effettuato il login");
                 Scegli();
             }
+            
 
         }
         static private void Logout()
         {
             if (IsLoggedIn)
             {
+                //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
                 Console.WriteLine("sei sicuro di voler uscire? (y/n)");
                 string ans = Console.ReadLine();
                 //Console.WriteLine(ans);
@@ -102,21 +144,33 @@ namespace LoginLogoutApp
                 //    Scegli();
                 //}
 
-                
+
                 if (ans == "y")
                 {
                     IsLoggedIn = false;
-                     
+
+                    //resetta schermata menù
+                    Console.Clear();
+                    populateMenu();
+
                     Console.WriteLine("sei stato sloggato correttamente");
                     Scegli();
                 }
                 else if (ans == "n")
                 {
+                    //resetta schermata menù
+                    Console.Clear();
+                    populateMenu();
+
                     Console.WriteLine("come non detto");
                     Scegli();
                 }
                 else
                 {
+                    //resetta schermata menù
+                    Console.Clear();
+                    populateMenu();
+
                     Console.WriteLine("invalid character, try again");
                     Scegli();
                 }
@@ -124,7 +178,10 @@ namespace LoginLogoutApp
 
             }
             else
-            {
+            {   //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
                 Console.WriteLine("Non sei ancora loggato!");
                 Scegli();
             }
@@ -133,9 +190,85 @@ namespace LoginLogoutApp
         static private DateTime DataOraAccesso { get; set; }
         static private void LoginTime()
         {
-            Console.WriteLine($"hai eseguito l'ultimo accesso il {DataOraAccesso.Day} {DataOraAccesso.Month} {DataOraAccesso.Year} alle {DataOraAccesso.Hour}");
-            Scegli();
+            if (IsLoggedIn)
+            {
+                //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
+                Console.WriteLine($"hai eseguito l'ultimo accesso il {DataOraAccesso.Day}/{DataOraAccesso.Month}/{DataOraAccesso.Year} alle {DataOraAccesso.TimeOfDay}");
+                Scegli();
+            }
+            else
+            {
+                Console.Clear();
+                populateMenu();
+
+                Console.WriteLine("non sei ancora loggato!");
+                Scegli();
+            }
+
+        }
+        static private List<Accesso> CronologiaAccessi { get; set; }
+        static private void PrintAccessList()
+        {
+            if( CronologiaAccessi != null)
+            {
+                //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
+                Console.WriteLine("--------------Lista Accessi--------------");
+                for (int i = 0;i <  CronologiaAccessi.Count;i++)
+                {
+                    Console.WriteLine($"{CronologiaAccessi[i].NomeUtente} il {CronologiaAccessi[i].Data} alle {CronologiaAccessi[i].Ora}");
+                }
+                Console.WriteLine("-----------------------------------------");
+                Scegli();
+            }
+            else
+            {   //resetta schermata menù
+                Console.Clear();
+                populateMenu();
+
+                Console.WriteLine("non è stato eseguito ancora nessun accesso.");
+                Scegli();
+            }
+        }
+        static private void Exit()
+        {   
+            Console.Clear();
+            populateMenu();
+            Console.WriteLine("Sei sicuro di voler uscire dall'applicazione? (y/n)");
+            string choice = Console.ReadLine();
+            if (choice == "y") { Console.Clear(); }
+            else if (choice == "n") {
+                Console.Clear();
+                populateMenu();
+                Console.WriteLine("come non detto");
+                Scegli();
+            }
+            else {
+                Console.Clear();
+                populateMenu();
+                Scegli();
+            }
         }
 
+
+    }
+
+    public class Accesso
+    {
+        public string NomeUtente { get; set; }
+        public string Data { get; set; }
+        public string Ora { get; set; }
+        public Accesso(string nome, string data, string ora)
+            {
+                this.NomeUtente = nome;
+                this.Data = data;
+                this.Ora = ora;
+               
+            }
     }
 }
